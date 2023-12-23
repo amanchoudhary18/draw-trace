@@ -67,7 +67,12 @@ export const useDraw = (
           strokeStack.pop();
         }
         setStrokeArray([
-          { prevPoint: prevPoint.current, currentPoint, activity, lineColor },
+          {
+            prevPoint: prevPoint.current ?? currentPoint,
+            currentPoint,
+            activity,
+            lineColor,
+          },
         ]);
 
         strokeStack.push(strokeArray);
@@ -77,12 +82,21 @@ export const useDraw = (
       }
 
       if (!shapes.includes(activity)) {
-        strokeStack.pop();
+        if (isDrawingShape) {
+          strokeStack.pop();
+        }
 
         setStrokeArray([
           ...strokeArray,
-          { prevPoint: prevPoint.current, currentPoint, activity, lineColor },
+          {
+            prevPoint: prevPoint.current ?? currentPoint,
+            currentPoint,
+            activity,
+            lineColor,
+          },
         ]);
+
+        setIsDrawingShape(true);
 
         strokeStack.push(strokeArray);
         onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });

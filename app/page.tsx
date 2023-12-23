@@ -14,6 +14,7 @@ import rectangleIcon from "../assets/rectangle-icon.png";
 import diamondIcon from "../assets/diamond-icon.png";
 import roundedRectangleIcon from "../assets/rounded-rectangle-icon.png";
 import arrowIcon from "../assets/arrow-icon.png";
+import undoIcon from "../assets/undo-icon.png";
 
 import Image from "next/image";
 import { StrokeStack, Stroke, Draw, Point } from "@/types/typing";
@@ -262,7 +263,9 @@ const Page: FC<pageProps> = ({}) => {
               />
             </div>
 
-            <button onClick={() => handleUndo()}>Undo</button>
+            <button onClick={() => handleUndo()}>
+              <Image src={undoIcon} alt="undo-icon" width={16} height={16} />
+            </button>
 
             {/* <button
               className={`bg-blue-500 text-white font-bold py-2 px-4 rounded ${

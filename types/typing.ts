@@ -18,6 +18,7 @@ export class StrokeStack {
 
   drawStroke = (ctx: CanvasRenderingContext2D, stroke: Stroke) => {
     const { prevPoint, currentPoint, lineColor, activity } = stroke;
+    console.log(this.stack);
 
     if (activity === "draw") {
       ctx.beginPath();
