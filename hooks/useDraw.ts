@@ -15,7 +15,10 @@ const shapes = [
 export const useDraw = (
   onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void,
   activity: string,
-  strokeStack: StrokeStack
+  strokeStack: StrokeStack,
+  strokeArray: Stroke[],
+  setStrokeArray: React.Dispatch<React.SetStateAction<Stroke[]>>,
+  lineColor: string
 ) => {
   const [mouseDown, setMouseDown] = useState(false);
 
@@ -27,6 +30,8 @@ export const useDraw = (
   const onMouseDown = () => {
     setMouseDown(true);
     prevPoint.current = null;
+
+    setStrokeArray([]);
   };
 
   useEffect(() => {
@@ -61,11 +66,25 @@ export const useDraw = (
         if (isDrawingShape) {
           strokeStack.pop();
         }
+        setStrokeArray([
+          { prevPoint: prevPoint.current, currentPoint, activity, lineColor },
+        ]);
+
+        strokeStack.push(strokeArray);
+
         setIsDrawingShape(true);
         onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
       }
 
       if (!shapes.includes(activity)) {
+        strokeStack.pop();
+
+        setStrokeArray([
+          ...strokeArray,
+          { prevPoint: prevPoint.current, currentPoint, activity, lineColor },
+        ]);
+
+        strokeStack.push(strokeArray);
         onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
         prevPoint.current = currentPoint;
       }

@@ -24,8 +24,17 @@ const strokeStack = new StrokeStack();
 
 const Page: FC<pageProps> = ({}) => {
   const [activity, setActivity] = useState("draw");
-  const { canvasRef, onMouseDown } = useDraw(drawLine, activity, strokeStack);
+  const [strokeArray, setStrokeArray] = useState<Stroke>([]);
   const [lineColor, setLineColor] = useState("#000");
+
+  const { canvasRef, onMouseDown } = useDraw(
+    drawLine,
+    activity,
+    strokeStack,
+    strokeArray,
+    setStrokeArray,
+    lineColor
+  );
 
   // Pencil Gif
   const [showPencilGif, setShowPencilGif] = useState(false);
@@ -69,13 +78,6 @@ const Page: FC<pageProps> = ({}) => {
   }, []);
 
   function drawLine({ prevPoint, currentPoint, ctx }: Draw) {
-    strokeStack.push({
-      prevPoint: prevPoint ?? currentPoint,
-      currentPoint,
-      activity,
-      lineColor,
-    });
-
     strokeStack.redrawAll(ctx);
   }
 
@@ -84,6 +86,14 @@ const Page: FC<pageProps> = ({}) => {
     if (ctx) {
       ctx.clearRect(0, 0, canvasRef.current?.width, canvasRef.current?.height);
       strokeStack.clearStack();
+    }
+  };
+
+  const handleUndo = () => {
+    const ctx = canvasRef.current?.getContext("2d");
+    if (ctx) {
+      strokeStack.pop();
+      strokeStack.redrawAll(ctx);
     }
   };
 
@@ -251,6 +261,8 @@ const Page: FC<pageProps> = ({}) => {
                 height={16}
               />
             </div>
+
+            <button onClick={() => handleUndo()}>Undo</button>
 
             {/* <button
               className={`bg-blue-500 text-white font-bold py-2 px-4 rounded ${

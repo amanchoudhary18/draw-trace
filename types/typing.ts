@@ -14,7 +14,7 @@ export interface Stroke {
 }
 
 export class StrokeStack {
-  stack: Stroke[];
+  stack: Stroke[][];
 
   drawStroke = (ctx: CanvasRenderingContext2D, stroke: Stroke) => {
     const { prevPoint, currentPoint, lineColor, activity } = stroke;
@@ -151,19 +151,21 @@ export class StrokeStack {
     this.stack = [];
   }
 
-  push(stroke: Stroke) {
+  push(stroke: Stroke[]) {
     this.stack.push(stroke);
   }
 
-  pop(): Stroke | undefined {
+  pop(): Stroke[] | undefined {
     return this.stack.pop();
   }
 
   redrawAll(ctx: CanvasRenderingContext2D | null) {
     if (!ctx) return;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    this.stack.forEach((stroke) => {
-      this.drawStroke(ctx, stroke);
+    this.stack.forEach((strokes) => {
+      strokes.forEach((stroke) => {
+        this.drawStroke(ctx, stroke);
+      });
     });
   }
 
