@@ -22,6 +22,8 @@ export class ImageDataStack {
 
   addImageData(imageData: ImageData) {
     this.stack.push(imageData);
+
+    console.log(this.stack);
   }
 
   removeTopImageData() {
