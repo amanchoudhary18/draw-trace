@@ -16,9 +16,11 @@ import roundedRectangleIcon from "../assets/rounded-rectangle-icon.png";
 import arrowIcon from "../assets/arrow-icon.png";
 
 import Image from "next/image";
-import { Stroke, Draw, Point } from "@/types/typing";
+import { ImageDataStack, Stroke, Draw, Point } from "@/types/typing";
 
 interface pageProps {}
+
+const imageDataStack = new ImageDataStack();
 
 const drawStroke = (ctx: CanvasRenderingContext2D, stroke: Stroke) => {
   const { prevPoint, currentPoint, lineColor, activity } = stroke;
@@ -145,7 +147,11 @@ const drawStroke = (ctx: CanvasRenderingContext2D, stroke: Stroke) => {
 
 const Page: FC<pageProps> = ({}) => {
   const [activity, setActivity] = useState("draw");
-  const { canvasRef, onMouseDown } = useDraw(drawLine, activity);
+  const { canvasRef, onMouseDown, toolsRef } = useDraw(
+    drawLine,
+    activity,
+    imageDataStack
+  );
   const [lineColor, setLineColor] = useState("#000");
 
   // Pencil Gif
@@ -196,13 +202,24 @@ const Page: FC<pageProps> = ({}) => {
       activity,
       lineColor,
     });
-    const canvas = canvasRef?.current;
   }
 
   const handleClearCanvas = () => {
     const ctx = canvasRef.current?.getContext("2d");
     if (ctx) {
       ctx.clearRect(0, 0, canvasRef.current?.width, canvasRef.current?.height);
+    }
+
+    imageDataStack.clearStack();
+  };
+
+  const handleUndo = () => {
+    const ctx = canvasRef.current?.getContext("2d");
+
+    imageDataStack.removeTopImageData();
+    if (ctx) {
+      ctx.clearRect(0, 0, canvasRef.current?.width, canvasRef.current?.height);
+      imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
     }
   };
 
@@ -217,6 +234,7 @@ const Page: FC<pageProps> = ({}) => {
             backgroundColor: "white",
             boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",
           }}
+          ref={toolsRef}
         >
           <div className="flex flex-row gap-5 mx-16 my-4">
             <div
@@ -369,6 +387,17 @@ const Page: FC<pageProps> = ({}) => {
                 width={16}
                 height={16}
               />
+            </div>
+
+            <div
+              onClick={handleUndo}
+              style={{
+                padding: "6px",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
+              Undo
             </div>
 
             {/* <button

@@ -14,23 +14,18 @@ export interface Stroke {
 }
 
 export class ImageDataStack {
-  maxLength: number;
   stack: ImageData[];
 
   constructor(maxLength: number = 20) {
-    this.maxLength = 20;
     this.stack = [];
   }
 
   addImageData(imageData: ImageData) {
-    if (this.stack.length === this.maxLength) {
-      this.stack.shift();
-      console.log("here");
-    }
     this.stack.push(imageData);
   }
 
   removeTopImageData() {
+    console.log(this.stack);
     if (this.stack.length > 0) {
       this.stack.pop();
     } else {

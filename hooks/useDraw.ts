@@ -14,16 +14,17 @@ const shapes = [
 
 export const useDraw = (
   onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void,
-  activity: string
+  activity: string,
+  imageDataStack: ImageDataStack
 ) => {
   const [mouseDown, setMouseDown] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const toolsRef = useRef<HTMLDivElement>(null);
+
   const prevPoint = useRef<null | Point>(null);
 
   const [isDrawingShape, setIsDrawingShape] = useState(false);
-
-  const imageDataStack = new ImageDataStack(20);
 
   const onMouseDown = () => {
     setMouseDown(true);
@@ -60,9 +61,38 @@ export const useDraw = (
 
       if (shapes.includes(activity)) {
         if (isDrawingShape) {
+          imageDataStack.removeTopImageData();
+          if (ctx) {
+            ctx.clearRect(
+              0,
+              0,
+              canvasRef.current?.width,
+              canvasRef.current?.height
+            );
+            imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+          }
         }
         setIsDrawingShape(true);
         onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
+
+        if (ctx) {
+          const imageData = ctx.getImageData(
+            0,
+            0,
+            canvasRef.current.width,
+            canvasRef.current.height
+          );
+          ctx.clearRect(
+            0,
+            0,
+            canvasRef.current?.width,
+            canvasRef.current?.height
+          );
+
+          imageDataStack.addImageData(imageData);
+
+          imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+        }
       }
 
       if (!shapes.includes(activity)) {
@@ -76,21 +106,31 @@ export const useDraw = (
       setIsDrawingShape(false);
 
       const ctx = canvasRef.current?.getContext("2d");
+      const clickedElement = e.target as HTMLElement;
+      if (toolsRef.current?.contains(clickedElement)) {
+        // Clicked on tools section, don't add ImageData to the stack
+        return;
+      }
 
-      const imageData = ctx.getImageData(
-        0,
-        0,
-        canvasRef.current.width,
-        canvasRef.current.height
-      );
-      ctx.clearRect(0, 0, canvasRef.current?.width, canvasRef.current?.height);
+      if (!shapes.includes(activity) && ctx) {
+        const imageData = ctx.getImageData(
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+        ctx.clearRect(
+          0,
+          0,
+          canvasRef.current?.width,
+          canvasRef.current?.height
+        );
 
-      // Push the obtained ImageData to the stack
-      imageDataStack.addImageData(imageData);
+        imageDataStack.addImageData(imageData);
 
-      // Render the topmost ImageData from the stack onto the canvas
-      imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
-      console.log(imageDataStack.stack.length);
+        imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+      }
+
       prevPoint.current = null;
     };
 
@@ -106,5 +146,5 @@ export const useDraw = (
     };
   }, [onDraw]);
 
-  return { canvasRef, onMouseDown };
+  return { canvasRef, onMouseDown, toolsRef };
 };
