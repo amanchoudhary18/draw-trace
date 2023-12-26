@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { StrokeStack, Stroke, Draw, Point } from "@/types/typing";
+import { ImageDataStack, Stroke, Draw, Point } from "@/types/typing";
 
 const shapes = [
   "circle",
@@ -14,8 +14,7 @@ const shapes = [
 
 export const useDraw = (
   onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void,
-  activity: string,
-  strokeStack: StrokeStack
+  activity: string
 ) => {
   const [mouseDown, setMouseDown] = useState(false);
 
@@ -23,6 +22,8 @@ export const useDraw = (
   const prevPoint = useRef<null | Point>(null);
 
   const [isDrawingShape, setIsDrawingShape] = useState(false);
+
+  const imageDataStack = new ImageDataStack(20);
 
   const onMouseDown = () => {
     setMouseDown(true);
@@ -59,7 +60,6 @@ export const useDraw = (
 
       if (shapes.includes(activity)) {
         if (isDrawingShape) {
-          strokeStack.pop();
         }
         setIsDrawingShape(true);
         onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
@@ -75,6 +75,22 @@ export const useDraw = (
       setMouseDown(false);
       setIsDrawingShape(false);
 
+      const ctx = canvasRef.current?.getContext("2d");
+
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      ctx.clearRect(0, 0, canvasRef.current?.width, canvasRef.current?.height);
+
+      // Push the obtained ImageData to the stack
+      imageDataStack.addImageData(imageData);
+
+      // Render the topmost ImageData from the stack onto the canvas
+      imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+      console.log(imageDataStack.stack.length);
       prevPoint.current = null;
     };
 
