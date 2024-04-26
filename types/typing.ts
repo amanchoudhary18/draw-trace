@@ -11,6 +11,9 @@ export interface Stroke {
   currentPoint: Point;
   activity: string;
   lineColor: string;
+  bgColor: string;
+  lineWidth: number;
+  opacity: number;
 }
 
 export class ImageDataStack {

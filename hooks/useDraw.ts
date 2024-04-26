@@ -10,6 +10,7 @@ const shapes = [
   "rounded rectangle",
   "rectangle",
   "arrow",
+  "move",
 ];
 
 export const useDraw = (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useDraw } from "@/hooks/useDraw";
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useRef } from "react";
 import "./page.css";
 import pencilIcon from "../assets/pencil-icon.png";
 import pencilGif from "../assets/pencil-gif.gif";
@@ -14,6 +14,7 @@ import rectangleIcon from "../assets/rectangle-icon.png";
 import diamondIcon from "../assets/diamond-icon.png";
 import roundedRectangleIcon from "../assets/rounded-rectangle-icon.png";
 import arrowIcon from "../assets/arrow-icon.png";
+import transparentIcon from "../assets/transparent-icon.png";
 
 import Image from "next/image";
 import { ImageDataStack, Stroke, Draw, Point } from "@/types/typing";
@@ -22,137 +23,32 @@ interface pageProps {}
 
 const imageDataStack = new ImageDataStack();
 
-const drawStroke = (ctx: CanvasRenderingContext2D, stroke: Stroke) => {
-  const { prevPoint, currentPoint, lineColor, activity } = stroke;
-
-  if (activity === "draw") {
-    ctx.beginPath();
-    ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 10;
-    ctx.lineCap = "round";
-    ctx.moveTo(prevPoint.x, prevPoint.y);
-    ctx.lineTo(currentPoint.x, currentPoint.y);
-    ctx.stroke();
-  } else if (activity === "erase") {
-    const eraserRadius = 10;
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath();
-    ctx.arc(currentPoint.x, currentPoint.y, eraserRadius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalCompositeOperation = "source-over";
-  } else if (activity === "circle") {
-    const radiusX = Math.abs(currentPoint.x - prevPoint.x);
-    const radiusY = Math.abs(currentPoint.y - prevPoint.y);
-
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.ellipse(prevPoint.x, prevPoint.y, radiusX, radiusY, 0, 0, 2 * Math.PI);
-    ctx.stroke();
-  } else if (activity === "triangle") {
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.moveTo(prevPoint.x, prevPoint.y);
-    ctx.lineTo(currentPoint.x, currentPoint.y);
-    ctx.lineTo(prevPoint.x - (currentPoint.x - prevPoint.x), currentPoint.y);
-    ctx.closePath();
-    ctx.stroke();
-  } else if (activity === "diamond") {
-    const width = Math.abs(currentPoint.x - prevPoint.x);
-    const height = Math.abs(currentPoint.y - prevPoint.y);
-    const cornerRadius = 10;
-
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.moveTo(prevPoint.x + width / 2, prevPoint.y);
-    ctx.lineTo(prevPoint.x + width, prevPoint.y + height / 2);
-    ctx.lineTo(prevPoint.x + width / 2, prevPoint.y + height);
-    ctx.lineTo(prevPoint.x, prevPoint.y + height / 2);
-    ctx.closePath();
-    ctx.stroke();
-  } else if (activity === "rectangle") {
-    const width = Math.abs(currentPoint.x - prevPoint.x);
-    const height = Math.abs(currentPoint.y - prevPoint.y);
-    const startX = Math.min(currentPoint.x, prevPoint.x);
-    const startY = Math.min(currentPoint.y, prevPoint.y);
-
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.rect(startX, startY, width, height);
-    ctx.stroke();
-  } else if (activity === "rounded rectangle") {
-    const width = Math.abs(currentPoint.x - prevPoint.x);
-    const height = Math.abs(currentPoint.y - prevPoint.y);
-    const startX = Math.min(currentPoint.x, prevPoint.x);
-    const startY = Math.min(currentPoint.y, prevPoint.y);
-    let cornerRadius = 10;
-
-    cornerRadius = Math.min(cornerRadius, width / 2, height / 2);
-
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-
-    ctx.moveTo(startX + cornerRadius, startY);
-    ctx.arcTo(
-      startX + width,
-      startY,
-      startX + width,
-      startY + height,
-      cornerRadius
-    );
-
-    ctx.arcTo(
-      startX + width,
-      startY + height,
-      startX,
-      startY + height,
-      cornerRadius
-    );
-
-    ctx.arcTo(startX, startY + height, startX, startY, cornerRadius);
-
-    ctx.arcTo(startX, startY, startX + width, startY, cornerRadius);
-
-    ctx.closePath();
-    ctx.stroke();
-  } else if (activity === "arrow") {
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-
-    const arrowSize = 20; // Adjust arrow size
-    const angle = Math.atan2(
-      currentPoint.y - prevPoint.y,
-      currentPoint.x - prevPoint.x
-    );
-
-    // Draw the arrow line
-    ctx.moveTo(prevPoint.x, prevPoint.y);
-    ctx.lineTo(currentPoint.x, currentPoint.y);
-
-    // Draw the arrowhead
-    ctx.lineTo(
-      currentPoint.x - arrowSize * Math.cos(angle - Math.PI / 6),
-      currentPoint.y - arrowSize * Math.sin(angle - Math.PI / 6)
-    );
-
-    ctx.moveTo(currentPoint.x, currentPoint.y);
-
-    ctx.lineTo(
-      currentPoint.x - arrowSize * Math.cos(angle + Math.PI / 6),
-      currentPoint.y - arrowSize * Math.sin(angle + Math.PI / 6)
-    );
-
-    ctx.stroke();
-  }
-};
+const shapes = [
+  "circle",
+  "triangle",
+  "line",
+  "diamond",
+  "rounded rectangle",
+  "rectangle",
+  "arrow",
+];
 
 const Page: FC<pageProps> = ({}) => {
-  const [activity, setActivity] = useState("draw");
+  const [activity, setActivity] = useState("move");
   const { canvasRef, onMouseDown, toolsRef } = useDraw(
     drawLine,
     activity,
     imageDataStack
   );
   const [lineColor, setLineColor] = useState("#000");
+  const [bgColor, setBgColor] = useState("#fff");
+  const [lineWidth, setLineWidth] = useState<number>(4);
+  const [opacity, setOpacity] = useState<number>(1.0);
+
+  const colorPickerRef = useRef(null);
+  const bgColorPickerRef = useRef(null);
+
+  const [cursorType, setCursorType] = useState("default");
 
   // Pencil Gif
   const [showPencilGif, setShowPencilGif] = useState(false);
@@ -162,7 +58,6 @@ const Page: FC<pageProps> = ({}) => {
 
     setShowPencilGif(true);
     handleClick("draw");
-    // Show the GIF for a second and then switch back to the image
     setTimeout(() => {
       setShowPencilGif(false);
     }, 1000);
@@ -177,7 +72,7 @@ const Page: FC<pageProps> = ({}) => {
 
   useEffect(() => {
     const canvas = canvasRef?.current;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas?.getContext("2d");
 
     const resizeCanvas = () => {
       const { width, height } = canvas.getBoundingClientRect();
@@ -195,12 +90,196 @@ const Page: FC<pageProps> = ({}) => {
     };
   }, []);
 
+  const hexToRGBA = (hex: string, opacity: number) => {
+    hex = hex.replace("#", "");
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  };
+
+  const drawStroke = (ctx: CanvasRenderingContext2D, stroke: Stroke) => {
+    const {
+      prevPoint,
+      currentPoint,
+      lineColor,
+      activity,
+      bgColor,
+      lineWidth,
+      opacity,
+    } = stroke;
+
+    if (activity === "draw") {
+      ctx.beginPath();
+      ctx.imageSmoothingEnabled = true;
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.moveTo(prevPoint.x, prevPoint.y);
+      ctx.lineTo(currentPoint.x, currentPoint.y);
+      ctx.stroke();
+    } else if (activity === "erase") {
+      const eraserRadius = 10;
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.arc(currentPoint.x, currentPoint.y, eraserRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+    } else if (activity === "circle") {
+      const radiusX = Math.abs(currentPoint.x - prevPoint.x);
+      const radiusY = Math.abs(currentPoint.y - prevPoint.y);
+
+      ctx.beginPath();
+      ctx.fillStyle = hexToRGBA(bgColor, opacity);
+      ctx.strokeStyle = lineColor;
+
+      ctx.lineWidth = 2;
+      ctx.ellipse(
+        prevPoint.x,
+        prevPoint.y,
+        radiusX,
+        radiusY,
+        0,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+      ctx.stroke();
+    } else if (activity === "triangle") {
+      ctx.beginPath();
+      ctx.fillStyle = hexToRGBA(bgColor, opacity);
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 2;
+      ctx.moveTo(prevPoint.x, prevPoint.y);
+      ctx.lineTo(currentPoint.x, currentPoint.y);
+      ctx.lineTo(prevPoint.x - (currentPoint.x - prevPoint.x), currentPoint.y);
+      ctx.fill();
+
+      ctx.closePath();
+      ctx.stroke();
+    } else if (activity === "diamond") {
+      const width = Math.abs(currentPoint.x - prevPoint.x);
+      const height = Math.abs(currentPoint.y - prevPoint.y);
+      const cornerRadius = 10;
+
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.moveTo(prevPoint.x + width / 2, prevPoint.y);
+      ctx.lineTo(prevPoint.x + width, prevPoint.y + height / 2);
+      ctx.lineTo(prevPoint.x + width / 2, prevPoint.y + height);
+      ctx.lineTo(prevPoint.x, prevPoint.y + height / 2);
+      ctx.fill();
+
+      ctx.closePath();
+      ctx.stroke();
+    } else if (activity === "rectangle") {
+      const width = Math.abs(currentPoint.x - prevPoint.x);
+      const height = Math.abs(currentPoint.y - prevPoint.y);
+      const startX = Math.min(currentPoint.x, prevPoint.x);
+      const startY = Math.min(currentPoint.y, prevPoint.y);
+
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.fillStyle = hexToRGBA(bgColor, opacity);
+      ctx.strokeStyle = lineColor;
+      ctx.rect(startX, startY, width, height);
+      ctx.fill();
+
+      ctx.stroke();
+    } else if (activity === "rounded rectangle") {
+      const width = Math.abs(currentPoint.x - prevPoint.x);
+      const height = Math.abs(currentPoint.y - prevPoint.y);
+      const startX = Math.min(currentPoint.x, prevPoint.x);
+      const startY = Math.min(currentPoint.y, prevPoint.y);
+      let cornerRadius = 10;
+
+      cornerRadius = Math.min(cornerRadius, width / 2, height / 2);
+
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.fillStyle = hexToRGBA(bgColor, opacity);
+      ctx.strokeStyle = lineColor;
+
+      ctx.moveTo(startX + cornerRadius, startY);
+      ctx.arcTo(
+        startX + width,
+        startY,
+        startX + width,
+        startY + height,
+        cornerRadius
+      );
+
+      ctx.arcTo(
+        startX + width,
+        startY + height,
+        startX,
+        startY + height,
+        cornerRadius
+      );
+
+      ctx.arcTo(startX, startY + height, startX, startY, cornerRadius);
+
+      ctx.arcTo(startX, startY, startX + width, startY, cornerRadius);
+      ctx.fill();
+
+      ctx.closePath();
+      ctx.stroke();
+    } else if (activity === "arrow") {
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+
+      const arrowSize = 20; // Adjust arrow size
+      const angle = Math.atan2(
+        currentPoint.y - prevPoint.y,
+        currentPoint.x - prevPoint.x
+      );
+
+      ctx.moveTo(prevPoint.x, prevPoint.y);
+      ctx.lineTo(currentPoint.x, currentPoint.y);
+
+      ctx.lineTo(
+        currentPoint.x - arrowSize * Math.cos(angle - Math.PI / 6),
+        currentPoint.y - arrowSize * Math.sin(angle - Math.PI / 6)
+      );
+
+      ctx.moveTo(currentPoint.x, currentPoint.y);
+
+      ctx.lineTo(
+        currentPoint.x - arrowSize * Math.cos(angle + Math.PI / 6),
+        currentPoint.y - arrowSize * Math.sin(angle + Math.PI / 6)
+      );
+
+      ctx.stroke();
+    }
+    if (activity === "move") {
+      // Draw rectangle with dotted blue lines
+      const width = Math.abs(currentPoint.x - prevPoint.x);
+      const height = Math.abs(currentPoint.y - prevPoint.y);
+      const startX = Math.min(currentPoint.x, prevPoint.x);
+      const startY = Math.min(currentPoint.y, prevPoint.y);
+
+      ctx.beginPath();
+      ctx.setLineDash([5, 5]);
+      ctx.fillStyle = hexToRGBA(bgColor, opacity);
+      ctx.strokeStyle = "blue";
+      ctx.rect(startX, startY, width, height);
+      ctx.fill();
+
+      ctx.stroke();
+      ctx.setLineDash([]); // Reset line style
+    }
+  };
+
   function drawLine({ prevPoint, currentPoint, ctx }: Draw) {
     drawStroke(ctx, {
       prevPoint: prevPoint ?? currentPoint,
       currentPoint,
       activity,
       lineColor,
+      bgColor,
+      lineWidth,
+      opacity,
     });
   }
 
@@ -222,6 +301,9 @@ const Page: FC<pageProps> = ({}) => {
       imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
     }
   };
+
+  const colors = ["#000000", "#008000", "#FF0000", "#0000FF", "#800080"];
+  const bgColors = ["#F6D6D6", "#F6F7C4", "#A1EEBD", "#7BD3EA"];
 
   return (
     <>
@@ -399,30 +481,170 @@ const Page: FC<pageProps> = ({}) => {
             >
               Undo
             </div>
-
-            {/* <button
-              className={`bg-blue-500 text-white font-bold py-2 px-4 rounded ${
-                activity === "erase" ? "" : "bg-gray-200 text-black-500"
-              }`}
-              onClick={() => handleClick("erase")}
-            >
-              Eraser
-            </button>
-
-            <button
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-              onClick={handleClearCanvas}
-            >
-              Clear Canvas
-            </button>
-
-            <input
-              type="color"
-              value={lineColor}
-              onChange={(e) => setLineColor(e.target.value)}
-            /> */}
           </div>
         </div>
+      </div>
+
+      <div className="fixed top-20 left-4 rounded-2xl bg-white shadow-md">
+        <div className="flex flex-col gap-6 mx-4 my-4">
+          <div>
+            <p className="text-xs">Stroke Color</p>
+            <div className="flex flex-row mt-2">
+              {colors.map((color, index) => (
+                <div
+                  key={index}
+                  className="w-5 h-5 rounded-sm my-2 mx-3 ml-0"
+                  style={{ backgroundColor: color, cursor: "pointer" }}
+                  onClick={() => setLineColor(color)}
+                ></div>
+              ))}
+              <div className="my-2 mx-1 h-5 border-l-2 border-gray-200"></div>
+
+              <div
+                className="w-6 h-6 rounded-sm my-1 mx-3"
+                style={{ backgroundColor: lineColor, cursor: "pointer" }}
+                onClick={() => colorPickerRef.current.click()}
+              ></div>
+
+              <div className="top-8 left-8 ">
+                <input
+                  type="color"
+                  className="w-0 opacity-0"
+                  onChange={(e) => setLineColor(e.target.value)}
+                  value={lineColor}
+                  ref={colorPickerRef}
+                  style={{ top: "110px" }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs">Background Color</p>
+            <div className="flex flex-row mt-2">
+              <div
+                className="rounded-sm my-2 mx-3 ml-0"
+                style={{ cursor: "pointer" }}
+                onClick={() => setBgColor("white")}
+              >
+                <Image
+                  src={transparentIcon}
+                  alt="transparent-icon"
+                  width={20}
+                  height={20}
+                />
+              </div>
+              {bgColors.map((color, index) => (
+                <div
+                  key={index}
+                  className="w-5 h-5 rounded-sm my-2 mx-3 ml-0"
+                  style={{ backgroundColor: color, cursor: "pointer" }}
+                  onClick={() => setBgColor(color)}
+                ></div>
+              ))}
+              <div className="my-2 mx-1 h-5 border-l-2 border-gray-200"></div>
+
+              {bgColor === "transparent" ? (
+                <div
+                  className="rounded-sm my-1 mx-3"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => bgColorPickerRef.current.click()}
+                >
+                  <Image
+                    src={transparentIcon}
+                    alt="transparent-icon"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-6 h-6 rounded-sm my-1 mx-3"
+                  style={{ backgroundColor: bgColor, cursor: "pointer" }}
+                  onClick={() => bgColorPickerRef.current.click()}
+                ></div>
+              )}
+
+              <div className="top-8 left-8 ">
+                <input
+                  type="color"
+                  className="w-0 opacity-0"
+                  onChange={(e) => setBgColor(e.target.value)}
+                  value={bgColor}
+                  ref={bgColorPickerRef}
+                  style={{ top: "110px" }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs">Line Thickness</p>
+            <div className="flex ">
+              <div className="flex flex-row mt-2 gap-2">
+                <div
+                  className={`flex justify-center items-center rounded-md border ${
+                    lineWidth === 4 ? "bg-purple-100" : ""
+                  }`}
+                  onClick={() => setLineWidth(4)}
+                  style={{ height: "30px", cursor: "pointer" }}
+                >
+                  <div
+                    className="flex justify-center items-center w-4 bg-black rounded-md mx-2 my-5"
+                    style={{ height: "2px" }}
+                  ></div>
+                </div>
+
+                <div
+                  className={`flex justify-center items-center rounded-md border ${
+                    lineWidth === 8 ? "bg-purple-100" : ""
+                  }`}
+                  onClick={() => setLineWidth(8)}
+                  style={{ height: "30px", cursor: "pointer" }}
+                >
+                  <div
+                    className="flex justify-center items-center w-4 bg-black rounded-md mx-2 my-5"
+                    style={{ height: "4px" }}
+                  ></div>
+                </div>
+
+                <div
+                  className={`flex justify-center items-center rounded-md border  ${
+                    lineWidth === 16 ? "bg-purple-100" : ""
+                  }`}
+                  onClick={() => setLineWidth(16)}
+                  style={{ height: "30px", cursor: "pointer" }}
+                >
+                  <div
+                    className="flex justify-center items-center w-4 bg-black rounded-md mx-2 my-5"
+                    style={{ height: "5.5px" }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {shapes.includes(activity) && (
+            <div>
+              <p className="text-xs">Opacity</p>
+              <div className="flex">
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1.0"
+                  step="0.025"
+                  value={opacity}
+                  onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                  style={{ width: "100%" }}
+                  className="mr-2"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-white flex justify-center items-center">
         <canvas
           ref={canvasRef}
           className="w-screen hscreen"
