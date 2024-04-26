@@ -61,38 +61,23 @@ export const useDraw = (
       }
 
       if (shapes.includes(activity)) {
-        if (isDrawingShape) {
-          imageDataStack.removeTopImageData();
-          if (ctx) {
-            ctx.clearRect(
-              0,
-              0,
-              canvasRef.current?.width,
-              canvasRef.current?.height
-            );
-            imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+
+        if (ctx && canvas) {
+          if (isDrawingShape) {
+            imageDataStack.removeTopImageData();
+            ctx.clearRect(0, 0, canvas.width ?? 0, canvas.height ?? 0);
+            imageDataStack.putTopImageDataOnCanvas(ctx, canvas);
           }
-        }
-        setIsDrawingShape(true);
-        onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
 
-        if (ctx) {
-          const imageData = ctx.getImageData(
-            0,
-            0,
-            canvasRef.current.width,
-            canvasRef.current.height
-          );
-          ctx.clearRect(
-            0,
-            0,
-            canvasRef.current?.width,
-            canvasRef.current?.height
-          );
+          setIsDrawingShape(true);
+          onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
 
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          ctx.clearRect(0, 0, canvas.width ?? 0, canvas.height ?? 0);
           imageDataStack.addImageData(imageData);
-
-          imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+          imageDataStack.putTopImageDataOnCanvas(ctx, canvas);
         }
       }
 
@@ -113,23 +98,17 @@ export const useDraw = (
         return;
       }
 
-      if (!shapes.includes(activity) && ctx) {
-        const imageData = ctx.getImageData(
-          0,
-          0,
-          canvasRef.current.width,
-          canvasRef.current.height
-        );
-        ctx.clearRect(
-          0,
-          0,
-          canvasRef.current?.width,
-          canvasRef.current?.height
-        );
+      if (!shapes.includes(activity)) {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
 
-        imageDataStack.addImageData(imageData);
+        if (ctx && canvas) {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+          imageDataStack.addImageData(imageData);
+          imageDataStack.putTopImageDataOnCanvas(ctx, canvas);
+        }
       }
 
       prevPoint.current = null;

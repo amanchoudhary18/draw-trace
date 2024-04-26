@@ -72,13 +72,15 @@ const Page: FC<pageProps> = ({}) => {
 
   useEffect(() => {
     const canvas = canvasRef?.current;
-    const ctx = canvas?.getContext("2d");
+    const ctx = canvas ? canvas.getContext("2d") : null;
 
     const resizeCanvas = () => {
-      const { width, height } = canvas.getBoundingClientRect();
+      const { width, height } = canvas?.getBoundingClientRect() || {};
 
-      canvas.width = width;
-      canvas.height = height;
+      if (canvas) {
+        canvas.width = width || 0;
+        canvas.height = height || 0;
+      }
     };
 
     resizeCanvas();
@@ -284,21 +286,23 @@ const Page: FC<pageProps> = ({}) => {
   }
 
   const handleClearCanvas = () => {
-    const ctx = canvasRef.current?.getContext("2d");
-    if (ctx) {
-      ctx.clearRect(0, 0, canvasRef.current?.width, canvasRef.current?.height);
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx && canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     imageDataStack.clearStack();
   };
 
   const handleUndo = () => {
-    const ctx = canvasRef.current?.getContext("2d");
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
 
-    imageDataStack.removeTopImageData();
-    if (ctx) {
-      ctx.clearRect(0, 0, canvasRef.current?.width, canvasRef.current?.height);
-      imageDataStack.putTopImageDataOnCanvas(ctx, canvasRef.current);
+    if (ctx && canvas) {
+      imageDataStack.removeTopImageData();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      imageDataStack.putTopImageDataOnCanvas(ctx, canvas);
     }
   };
 
@@ -503,13 +507,16 @@ const Page: FC<pageProps> = ({}) => {
               <div
                 className="w-6 h-6 rounded-sm my-1 mx-3"
                 style={{ backgroundColor: lineColor, cursor: "pointer" }}
-                onClick={() => colorPickerRef.current.click()}
+                onClick={() =>
+                  colorPickerRef.current &&
+                  (colorPickerRef.current as HTMLInputElement).click()
+                }
               ></div>
 
-              <div className="top-8 left-8 ">
+              <div className="top-8 left-8">
                 <input
                   type="color"
-                  className="w-0 opacity-0"
+                  className="w-0 opacity-0 absolute"
                   onChange={(e) => setLineColor(e.target.value)}
                   value={lineColor}
                   ref={colorPickerRef}
@@ -548,7 +555,10 @@ const Page: FC<pageProps> = ({}) => {
                 <div
                   className="rounded-sm my-1 mx-3"
                   style={{ cursor: "pointer" }}
-                  onClick={() => bgColorPickerRef.current.click()}
+                  onClick={() =>
+                    bgColorPickerRef.current &&
+                    (bgColorPickerRef.current as HTMLInputElement).click()
+                  }
                 >
                   <Image
                     src={transparentIcon}
@@ -561,7 +571,10 @@ const Page: FC<pageProps> = ({}) => {
                 <div
                   className="w-6 h-6 rounded-sm my-1 mx-3"
                   style={{ backgroundColor: bgColor, cursor: "pointer" }}
-                  onClick={() => bgColorPickerRef.current.click()}
+                  onClick={() =>
+                    bgColorPickerRef.current &&
+                    (bgColorPickerRef.current as HTMLInputElement).click()
+                  }
                 ></div>
               )}
 
