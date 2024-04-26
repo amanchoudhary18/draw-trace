@@ -25,16 +25,11 @@ export class ImageDataStack {
 
   addImageData(imageData: ImageData) {
     this.stack.push(imageData);
-
-    console.log(this.stack);
   }
 
   removeTopImageData() {
-    console.log(this.stack);
     if (this.stack.length > 0) {
       this.stack.pop();
-    } else {
-      console.log("Stack is empty");
     }
   }
 
@@ -45,8 +40,6 @@ export class ImageDataStack {
     if (this.stack.length > 0) {
       const topImageData = this.stack[this.stack.length - 1];
       ctx.putImageData(topImageData, 0, 0);
-    } else {
-      console.log("Stack is empty");
     }
   }
 

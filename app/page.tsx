@@ -40,8 +40,8 @@ const Page: FC<pageProps> = ({}) => {
     activity,
     imageDataStack
   );
-  const [lineColor, setLineColor] = useState("#000");
-  const [bgColor, setBgColor] = useState("#fff");
+  const [lineColor, setLineColor] = useState("#000000");
+  const [bgColor, setBgColor] = useState("#ffffff");
   const [lineWidth, setLineWidth] = useState<number>(4);
   const [opacity, setOpacity] = useState<number>(1.0);
 
@@ -97,6 +97,8 @@ const Page: FC<pageProps> = ({}) => {
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
+
+    console.log("after conversion ", `rgba(${r}, ${g}, ${b}, ${opacity})`);
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   };
 
@@ -129,6 +131,7 @@ const Page: FC<pageProps> = ({}) => {
       ctx.fill();
       ctx.globalCompositeOperation = "source-over";
     } else if (activity === "circle") {
+      console.log("here", bgColor);
       const radiusX = Math.abs(currentPoint.x - prevPoint.x);
       const radiusY = Math.abs(currentPoint.y - prevPoint.y);
 
@@ -532,7 +535,7 @@ const Page: FC<pageProps> = ({}) => {
               <div
                 className="rounded-sm my-2 mx-3 ml-0"
                 style={{ cursor: "pointer" }}
-                onClick={() => setBgColor("white")}
+                onClick={() => setBgColor("#ffffff")}
               >
                 <Image
                   src={transparentIcon}
@@ -551,7 +554,7 @@ const Page: FC<pageProps> = ({}) => {
               ))}
               <div className="my-2 mx-1 h-5 border-l-2 border-gray-200"></div>
 
-              {bgColor === "transparent" ? (
+              {bgColor === "white" ? (
                 <div
                   className="rounded-sm my-1 mx-3"
                   style={{ cursor: "pointer" }}
