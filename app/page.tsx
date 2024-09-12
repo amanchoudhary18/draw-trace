@@ -16,7 +16,6 @@ import roundedRectangleIcon from "../assets/rounded-rectangle-icon.png";
 import arrowIcon from "../assets/arrow-icon.png";
 import transparentIcon from "../assets/transparent-icon.png";
 
-import Image from "next/image";
 import { ImageDataStack, Stroke, Draw, Point } from "@/types/typing";
 
 interface pageProps {}
@@ -337,14 +336,9 @@ const Page: FC<pageProps> = ({}) => {
               } `}
             >
               {showPencilGif ? (
-                <Image
-                  src={pencilGif}
-                  alt="pencil-gif"
-                  width={16}
-                  height={16}
-                />
+                <img src={pencilGif} alt="pencil-gif" width={16} height={16} />
               ) : (
-                <Image
+                <img
                   src={pencilIcon}
                   alt="pencil-icon"
                   width={16}
@@ -361,12 +355,7 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <Image
-                src={eraserIcon}
-                alt="eraser-icon"
-                width={16}
-                height={16}
-              />
+              <img src={eraserIcon} alt="eraser-icon" width={16} height={16} />
             </div>
 
             <div
@@ -377,12 +366,7 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <Image
-                src={circleIcon}
-                alt="circle-icon"
-                width={16}
-                height={16}
-              />
+              <img src={circleIcon} alt="circle-icon" width={16} height={16} />
             </div>
 
             <div
@@ -393,7 +377,7 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <Image
+              <img
                 src={triangleIcon}
                 alt="triangle-icon"
                 width={16}
@@ -409,7 +393,7 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <Image
+              <img
                 src={diamondIcon}
                 alt="diamond-icon"
                 width={16}
@@ -425,7 +409,7 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <Image
+              <img
                 src={rectangleIcon}
                 alt="rectangle-icon"
                 width={16}
@@ -441,7 +425,7 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <Image
+              <img
                 src={roundedRectangleIcon}
                 alt="rounded-rectangle-icon"
                 width={16}
@@ -457,7 +441,7 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <Image src={arrowIcon} alt="arrow-icon" width={16} height={16} />
+              <img src={arrowIcon} alt="arrow-icon" width={16} height={16} />
             </div>
 
             <div
@@ -470,7 +454,7 @@ const Page: FC<pageProps> = ({}) => {
                 cursor: "pointer",
               }}
             >
-              <Image
+              <img
                 src={isResetHovered ? resetRedIcon : resetIcon}
                 alt="reset-icon"
                 width={16}
@@ -537,7 +521,7 @@ const Page: FC<pageProps> = ({}) => {
                 style={{ cursor: "pointer" }}
                 onClick={() => setBgColor("#ffffff")}
               >
-                <Image
+                <img
                   src={transparentIcon}
                   alt="transparent-icon"
                   width={20}
@@ -563,7 +547,7 @@ const Page: FC<pageProps> = ({}) => {
                     (bgColorPickerRef.current as HTMLInputElement).click()
                   }
                 >
-                  <Image
+                  <img
                     src={transparentIcon}
                     alt="transparent-icon"
                     width={24}
