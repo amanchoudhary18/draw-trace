@@ -326,7 +326,7 @@ const Page: FC<pageProps> = ({}) => {
             >
               {showPencilGif ? (
                 <Image
-                  src={pencilGif}
+                  src={`/pencil-gif.gif`}
                   alt="pencil-gif"
                   width={16}
                   height={16}
