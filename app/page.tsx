@@ -3,20 +3,9 @@
 import { useDraw } from "@/hooks/useDraw";
 import { FC, useState, useEffect, useRef } from "react";
 import "./page.css";
-import pencilIcon from "../assets/pencil-icon.png";
-import pencilGif from "../assets/pencil-gif.gif";
-import eraserIcon from "../assets/eraser-icon.png";
-import resetIcon from "../assets/reset.png";
-import resetRedIcon from "../assets/reset-red.png";
-import triangleIcon from "../assets/triangle-icon.png";
-import circleIcon from "../assets/circle-icon.png";
-import rectangleIcon from "../assets/rectangle-icon.png";
-import diamondIcon from "../assets/diamond-icon.png";
-import roundedRectangleIcon from "../assets/rounded-rectangle-icon.png";
-import arrowIcon from "../assets/arrow-icon.png";
-import transparentIcon from "../assets/transparent-icon.png";
 
 import { ImageDataStack, Stroke, Draw, Point } from "@/types/typing";
+import Image from "next/image";
 
 interface pageProps {}
 
@@ -336,10 +325,15 @@ const Page: FC<pageProps> = ({}) => {
               } `}
             >
               {showPencilGif ? (
-                <img src={pencilGif} alt="pencil-gif" width={16} height={16} />
+                <Image
+                  src={pencilGif}
+                  alt="pencil-gif"
+                  width={16}
+                  height={16}
+                />
               ) : (
-                <img
-                  src={pencilIcon}
+                <Image
+                  src={`/pencil-icon.png`}
                   alt="pencil-icon"
                   width={16}
                   height={16}
@@ -355,7 +349,12 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <img src={eraserIcon} alt="eraser-icon" width={16} height={16} />
+              <Image
+                src={`/eraser-icon.png`}
+                alt="eraser-icon"
+                width={16}
+                height={16}
+              />
             </div>
 
             <div
@@ -366,7 +365,12 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <img src={circleIcon} alt="circle-icon" width={16} height={16} />
+              <Image
+                src={`/circle-icon.png`}
+                alt="circle-icon"
+                width={16}
+                height={16}
+              />
             </div>
 
             <div
@@ -377,8 +381,8 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <img
-                src={triangleIcon}
+              <Image
+                src={`/triangle-icon.png`}
                 alt="triangle-icon"
                 width={16}
                 height={16}
@@ -393,8 +397,8 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <img
-                src={diamondIcon}
+              <Image
+                src={`/rectangle-icon.png`}
                 alt="diamond-icon"
                 width={16}
                 height={16}
@@ -409,8 +413,8 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <img
-                src={rectangleIcon}
+              <Image
+                src={`/rectangle-icon.png`}
                 alt="rectangle-icon"
                 width={16}
                 height={16}
@@ -425,8 +429,8 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <img
-                src={roundedRectangleIcon}
+              <Image
+                src={`/rectangle-icon.png`}
                 alt="rounded-rectangle-icon"
                 width={16}
                 height={16}
@@ -441,7 +445,12 @@ const Page: FC<pageProps> = ({}) => {
                   : "bg-white hover:bg-purple-100"
               } `}
             >
-              <img src={arrowIcon} alt="arrow-icon" width={16} height={16} />
+              <Image
+                src={`/arrow-icon.png`}
+                alt="arrow-icon"
+                width={16}
+                height={16}
+              />
             </div>
 
             <div
@@ -454,8 +463,8 @@ const Page: FC<pageProps> = ({}) => {
                 cursor: "pointer",
               }}
             >
-              <img
-                src={isResetHovered ? resetRedIcon : resetIcon}
+              <Image
+                src={isResetHovered ? `/reset-red.png` : `/reset.png`}
                 alt="reset-icon"
                 width={16}
                 height={16}
@@ -521,8 +530,8 @@ const Page: FC<pageProps> = ({}) => {
                 style={{ cursor: "pointer" }}
                 onClick={() => setBgColor("#ffffff")}
               >
-                <img
-                  src={transparentIcon}
+                <Image
+                  src={`/transparent-icon.png`}
                   alt="transparent-icon"
                   width={20}
                   height={20}
@@ -547,8 +556,8 @@ const Page: FC<pageProps> = ({}) => {
                     (bgColorPickerRef.current as HTMLInputElement).click()
                   }
                 >
-                  <img
-                    src={transparentIcon}
+                  <Image
+                    src={`/transparent-icon.png`}
                     alt="transparent-icon"
                     width={24}
                     height={24}
